@@ -64520,7 +64520,7 @@ r=A.j4(m,m,m,m,m,m,m,m,m,m,m,s,m,m,k,m,m,!0,m,m,m,m,m,A.a([new A.fn(r,B.h,1.5)],
 k=A.R(a).ax
 s=k.dy
 p=t.p
-r=A.SY(A.mn(A.a([l,new A.bn(B.aC,A.i3("Hi! I'm Patryk Wieczorek!",A.U1(s==null?k.db:s,r)),m)],p),B.a1,B.U),B.dm)
+r=A.SY(A.mn(A.a([l,new A.bn(B.aC,A.i3("Hi! I'm Patryk!",A.U1(s==null?k.db:s,r)),m)],p),B.a1,B.U),B.dm)
 s=A.R(a).ax
 k=s.fr
 l=k==null?s.cx:k
@@ -70385,7 +70385,7 @@ r($,"aA4","ald",()=>new A.PU(A.aB(A.a0("k0"))))
 r($,"azX","alb",()=>new A.Pw())
 s($,"aw8","aja",()=>A.ml("^[\\w!#%&'*+\\-.^`|~]+$",!0,!1))
 s($,"axe","a9B",()=>A.aeb())
-r($,"aAe","nd",()=>A.a([A.Y7("Mobile app written in Flutter and Dart for automatic creation of trips around British national park using forestry data and image recognition.","https://github.com/moramento22/KV6003-individual-project","","TreeTrip","images/treetrip_screenshot.png"),A.Y7("A University group project for a client, Blue Avocado. It involved making a way in which to automate file conversion for the current system as well as designing a new data dashboard and a database. It was written using JavaScript with React for the frontend and Java with SpringBoot for the backend.","","","Blue Avocado Automation","images/ba_screenshot.png"),A.Y7("A website for a fictional client, Living Planet. It was written using JavaScript, jQuery and PHP. It also used APIs to retrieve appropriate data. It was uploaded to the Microsoft Azure cloud service","","","Living Planet Website","images/livingplanet_screenshot.png"),A.Y7("A web app for visualising songs in mp3 files, written in JavaScript using the three.js package.","https://github.com/moramento22/moramento22.github.io/tree/main/audio_vis","https://moramento22.github.io/audio_vis/kf6018.html","Audio Visualiser","images/audio_screenshot.png")],A.a0("v<ED>")))
+r($,"aAe","nd",()=>A.a([A.Y7("Mobile app written in Flutter and Dart for automatic creation of trips around British national park using forestry data and image recognition.","https://github.com/moramento22/KV6003-individual-project","","TreeTrip","images/treetrip_screenshot.png"),A.Y7("A University group project for a client, Blue Avocado. It involved making a way in which to automate file conversion for the current system as well as designing a new data dashboard and a database. My job mainly involved working on the frontend, which was written in JavaScript with React.","","","Blue Avocado Automation","images/ba_screenshot.png"),A.Y7("A website for a fictional client, Living Planet. It was written using JavaScript, jQuery and PHP. It also used APIs to retrieve appropriate data. It was uploaded to the Microsoft Azure cloud service","","","Living Planet Website","images/livingplanet_screenshot.png"),A.Y7("A web app for visualising songs in mp3 files, written in JavaScript using the three.js package.","https://github.com/moramento22/moramento22.github.io/tree/main/audio_vis","https://moramento22.github.io/audio_vis/kf6018.html","Audio Visualiser","images/audio_screenshot.png")],A.a0("v<ED>")))
 s($,"axX","acS",()=>new A.E())
 r($,"arl","acR",()=>{var q=new A.W9()
 q.Qt($.acS())
