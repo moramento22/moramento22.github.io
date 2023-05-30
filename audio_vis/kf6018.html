@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+
+<!--This page is an audio visualiser that allows the user to upload their own audio file
+and play it while looking at an animation reacting to the audio playing.
+
+Part of assignment for KF6018 Computer Graphics and Animation module at Northumbria Univesity, Newcastle, UK
+@author Patryk Wieczorek w19017588
+MMXXII/MMXXIII-->
+
+<html lang="en">
+    <head>
+        <!--Basic HTML elements -->
+        <meta charset="UTF-8">
+        <title>KF6018 Assignment: Audio Visualiser</title>
+        <!--This page imports two scripts, three js (https://threejs.org/) used for animating the scene
+        and jsmediatags (https://github.com/aadsm/jsmediatags) used to retrieve metadata from audio files-->
+        <script src="https://threejs.org/build/three.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jsmediatags/3.9.5/jsmediatags.min.js"></script>
+    </head>
+
+    <style>
+        /* This section sets out some CSS styling for common elements for the whole page most styling however is done inline
+        in the rest of this page */
+        button {
+            background-color: rgba(0,0,0,0.5);
+            border: 0.01em solid white;
+            text-align: center;
+            text-decoration: none;
+            color: white;
+            border-radius: 0.2em;
+        }
+
+        :disabled {
+            background-color: rgba(43,43,43,0.5);
+            border: 0.01em solid rgba(9, 9, 9, 0.5);
+            text-align: center;
+            text-decoration: none;
+            color: rgba(43,43,43,0.5);
+            border-radius: 0.2em;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            -webkit-appearance: none;
+            height: 5px;
+            background-color: white;
+            outline: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 10px;
+            height: 10px;
+            background-color: rgba(0,0,0);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(0,0,0);
+            cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-progress {
+            background-color: rgba(0,0,0);
+        }
+
+    </style>
+
+    <body style="margin:0">
+        <!-- This section sets out the layout and main elements of the page including the initial form interface
+        and the interface of the music player -->
+
+        <!-- Audio element playing the uploaded music-->
+        <audio id="audio" style="display:none" onended="onEnded()" ontimeupdate="onTimeUpdate()"></audio>
+
+        <!-- This section outlines the layout of the initial interface, it allows the user to upload an audio file,
+        choose a theme for the visualiser and a shape of the inner object that will react to the music -->
+        <div id="overlay" style="position:fixed; display:block; width:100%; height:100%; top:0; left:0; right:0; bottom:0; background-color: rgba(0,0,0,0.5); z-index:2;">
+            <form id="fileForm" style="position:absolute; top:50%; left:50%; font-size:100%; color:white; transform:translate(-50%,-50%); -ms-transform:translate(-50%,-50%); font-family: sans-serif">
+                <h1>Audio visualiser</h1>
+                <fieldset>
+                    <legend>Audio file</legend>
+                    <label for="file">Pick an audio file from your files (mp3, wav or ogg).</label>
+                    <input type="file" id="file" onchange="onFileChange()" accept=".mp3, .wav, .ogg">
+                    <button type="button" id="play" onclick="onPlay()" disabled>Play</button>
+                </fieldset>
+                <fieldset>
+                    <legend>Theme</legend>
+                    <input type="radio" id="white" name="theme" value="white" checked>
+                    <label for="white">White</label>
+                    <input type="radio" id="dRed" name="theme" value="dRed">
+                    <label for="dRed">Dark Red</label>
+                    <input type="radio" id="lRed" name="theme" value="lRed">
+                    <label for="lRed">Light Red</label>
+                    <input type="radio" id="dGreen" name="theme" value="dGreen">
+                    <label for="dGreen">Dark Green</label>
+                    <input type="radio" id="lGreen" name="theme" value="lGreen">
+                    <label for="lGreen">Light Green</label>
+                    <input type="radio" id="dBlue" name="theme" value="dBlue">
+                    <label for="dBlue">Dark Blue</label>
+                    <input type="radio" id="lBlue" name="theme" value="lBlue">
+                    <label for="lBlue">Light Blue</label>
+                    <input type="radio" id="dPink" name="theme" value="dPink">
+                    <label for="dPink">Dark Pink</label>
+                    <input type="radio" id="lPink" name="theme" value="lPink">
+                    <label for="lPink">Light Pink</label>
+                    <input type="radio" id="dYellow" name="theme" value="dYellow">
+                    <label for="dYellow">Dark Yellow</label>
+                    <input type="radio" id="lYellow" name="theme" value="lYellow">
+                    <label for="lYellow">Light Yellow</label>
+                    <input type="radio" id="dTeal" name="theme" value="dTeal">
+                    <label for="dTeal">Dark Teal</label>
+                    <input type="radio" id="lTeal" name="theme" value="lTeal">
+                    <label for="lTeal">Light Teal</label>
+                </fieldset>
+                <fieldset>
+                    <legend>Inner shape</legend>
+                    <input type="radio" id="icosahedron" name="shape" value="icosahedron" checked onchange="onShapeChange(this)">
+                    <label for="icosahedron">Icosahedron (20 sides)</label>
+                    <input type="radio" id="dodecahedron" name="shape" value="dodecahedron" onchange="onShapeChange(this)">
+                    <label for="dodecahedron">Dodecahedron (12 sides)</label>
+                    <input type="radio" id="octahedron" name="shape" value="octahedron" onchange="onShapeChange(this)">
+                    <label for="octahedron">Octahedron (8 sides)</label>
+                    <input type="radio" id="cube" name="shape" value="cube" onchange="onShapeChange(this)">
+                    <label for="cube">Box</label>
+                    <input type="radio" id="tetrahedron" name="shape" value="tetrahedron" onchange="onShapeChange(this)">
+                    <label for="tetrahedron">Tetrahedron (4 sides)</label>
+                    <input type="radio" id="sphere" name="shape" value="sphere" onchange="onShapeChange(this)">
+                    <label for="sphere">Sphere</label>
+                </fieldset>
+            </form>
+            <!-- This form element will only appear when the song played by the user ends, it allows the user to either
+            play the same file again or choose another one -->
+            <form id="onEnd" style="visibility:hidden; position:absolute; top:50%; left:50%; font-size:100%; color:white; transform:translate(-50%,-50%); -ms-transform:translate(-50%,-50%); font-family: sans-serif">
+                <button type="button" onclick="onAgainPlay()">Play again?</button>
+                or
+                <button type="button" onclick="chooseAnother()">Choose another file?</button>
+            </form>
+        </div>
+
+        <!-- This section sets out the layout of the player that shows up ath the bottom of the page when an audio file is played.
+        It has play and pause buttons, a progress bar with current position and duration of the file shown as well as a full screen button,
+        a volume scroll and a button allowing the user to leave to the initial screen -->
+        <div id="player" style="color:white; font-family:sans-serif; position:fixed; display:none; width:100%; height:10%; top:90%; left:0; right:0; bottom:0; background-color:rgba(0,0,0,0.5); z-index:2;">
+            <div style="display:flex; flex-direction:row; position: absolute; height:100%; width:98%; margin-left:1%; margin-right:1%">
+                <button type="button" onclick="onPlayerPlay()" id="playerPlay" style="align-self:center; margin:1%">Play</button>
+                <button type="button" onclick="onPLayerPause()" id="playerPause" style="align-self:center; margin:1%;">Pause</button>
+                <input type="range" min="0" max="1000" id="progressBar" onchange="onBarChange()" style="align-self:center; margin:1%;">
+                <label for="progressBar" hidden>Progress of the song</label>
+                <p style="align-self:center; margin:1%;"><span id="currentTime"></span>/<span id="duration"></span></p>
+                <input type="range" min="0" max="100" id="volume" onchange="onVolumeChange()" style="align-self:center; margin:1%; width:10%;">
+                <label for="volume" hidden>Volume</label>
+                <button type="button" onclick="openFullScreen()" id="fullScreen" style="align-self: center; margin:1%">Full Screen</button>
+                <button type="button" onclick="closeFullScreen()" id="closeFullScreen" style="align-self: center; margin:1%; display:none">Close Full Screen</button>
+                <button type="button" onclick="onLeave()" id="leave" style="align-self: center; margin:1%;">Leave</button>
+            </div>
+        </div>
+
+        <!-- This section sets out the layout of an overlay that appears at the top of the visualiser and shows to the user
+        either the name of the current file played or name of the current song, artist and an album that the song is from
+        depending on whether the file has available metadata -->
+        <div id="songData" style="color:white; font-family:sans-serif; position:fixed; display:none; width:100%; height:10%; top:0; left:0; right:0; bottom:90%; background-color:rgba(0,0,0,0.5); z-index:2">
+            <div style="display:flex; flex-direction:row; position:absolute; height:100%; width:98%; margin-left:1%; margin-right:1%">
+                <p id="metadata" style="align-self:center; display:none">Now playing: <span id="songTitle"></span> by <span id="artist"></span> from the album <span id="album"></span></p>
+                <p id="noMetadata" style="align-self:center; display:none">Now playing: <span id="fileName"></span></p>
+            </div>
+        </div>
+
+        <!-- This section sets out an element that appears below the overlay with name of the file that shows the album cover
+         of the song played, if available -->
+        <div id="cover" style="color:white; font-family:sans-serif; position:fixed; display:none; width:200px; height:200px; left:0; top:10%; right:calc(100% - 20px); bottom:calc(100% - 20px); background-color: rgba(0,0,0,0.5); z-index:2; background-repeat:no-repeat; background-size:cover; flex-direction:row;">
+            <div id="noCover" style="display:none; align-self: center; margin:auto;">
+                <p>No cover available</p>
+            </div>
+        </div>
+
+        <!-- The section below sets out the script written in javascript that operates the animated scene and some of the
+         other elements of the page -->
+        <script>
+
+            let listener, audio, analyser, duration, currentTime;
+
+            const jsmediatags = window.jsmediatags;
+
+            /**
+             * This function triggers events on the click of the play buttton in the initial interface.
+             * It hides the initial overlay, prepares the player and the audio file and plays it.
+             * It also sets out the audio listener and audio analyser for three js.
+             */
+            function onPlay() {
+                document.getElementById("overlay").style.display = "none";
+                document.getElementById("player").style.display = "block";
+                document.getElementById("songData").style.display = "block";
+                document.getElementById("cover").style.display = "flex";
+                document.getElementById("audio").play();
+                document.getElementById("playerPlay").disabled = true;
+                document.getElementById("progressBar").max = document.getElementById("audio").duration;
+                document.getElementById("audio").volume = 0.5;
+                document.getElementById("volume").value = document.getElementById("audio").volume*100;
+                duration = document.getElementById("audio").duration;
+                let m = Math.floor(duration/60);
+                let s = Math.floor(duration%60);
+                let h = Math.floor(m/60);
+                m = m%60;
+                h = h.toFixed(0).padStart(2, '0');
+                m = m.toFixed(0).padStart(2, '0');
+                s = s.toFixed(0).padStart(2, '0');
+                duration = h + ":" + m + ":" + s;
+                document.getElementById("duration").innerText = duration;
+
+                listener = new THREE.AudioListener();
+                camera.add(listener);
+
+                if (!audio)
+                {
+                    setAudio();
+                }
+
+                analyser = new THREE.AudioAnalyser(audio, 32);
+            }
+
+            /**
+             * This part sets out an event listening for whether the document is in full screen.
+             * And a function that changes the behaviour of the page depending on whether it's in fullscreen,
+             */
+            document.addEventListener('fullscreenchange', function() {
+                    if (document.fullscreenElement)
+                    {
+                        document.getElementById("fullScreen").style.display = "none";
+                        document.getElementById("closeFullScreen").style.display = "block"
+                    }
+                    else if (document.fullscreenElement === null)
+                    {
+                        document.getElementById("fullScreen").style.display = "block";
+                        document.getElementById("closeFullScreen").style.display = "none";
+                    }
+            });
+
+            /**
+             * This function runs on clicking the fullscreen button and opens the document in fullscreen.
+             */
+            function openFullScreen() {
+                document.documentElement.requestFullscreen();
+            }
+
+            /**
+             * This function runs on clicking the close full screen button and closes fullscreen.
+             */
+            function closeFullScreen() {
+                document.exitFullscreen();
+            }
+
+            /**
+             * This function runs on clicking the leave button.
+             * It stops the music, makes the player invisible and makes the initial overlay visible again.
+             */
+            function onLeave()
+            {
+                document.getElementById("audio").pause();
+                document.getElementById("audio").currentTime = 0;
+                document.getElementById("player").style.display = "none";
+                document.getElementById("songData").style.display = "none";
+                document.getElementById("overlay").style.display = "block";
+                document.getElementById("cover").style.display = "none";
+            }
+
+            /**
+             * This function runs on any change of the value of the volume slider.
+             * It changes the volume of the playing audio file depending on the position
+             * of the slider.
+             */
+            function onVolumeChange()
+            {
+                document.getElementById("audio").volume = document.getElementById("volume").value/100;
+            }
+
+            /**
+             * This function sets the audio element and the media element source for that audio.
+             */
+            function setAudio()
+            {
+                audio = new THREE.Audio(listener);
+                audio.setMediaElementSource(document.getElementById("audio"));
+            }
+
+            /**
+             * This function runs when the play again button is clicked.
+             * This function works the same way as the onPlay() function apart from
+             * not setting a new audio listener and audio analyser.
+             */
+            function onAgainPlay()
+            {
+                document.getElementById("overlay").style.display = "none";
+                document.getElementById("audio").play();
+                document.getElementById("player").style.display = "block";
+                document.getElementById("songData").style.display = "block";
+                document.getElementById("cover").style.display = "flex";
+                duration = document.getElementById("audio").duration;
+                let m = Math.floor(duration/60);
+                let s = Math.floor(duration%60);
+                let h = Math.floor(m/60);
+                m = m%60;
+                h = h.toFixed(0).padStart(2, '0');
+                m = m.toFixed(0).padStart(2, '0');
+                s = s.toFixed(0).padStart(2, '0');
+                duration = h + ":" + m + ":" + s;
+                document.getElementById("duration").innerText = duration;
+                document.getElementById("progressBar").max = document.getElementById("audio").duration;
+                document.getElementById("volume").value = document.getElementById("audio").volume*100;
+                document.getElementById("audio").volume = 0.5;
+            }
+
+            /**
+             * This function runs on clicking the play button in the player.
+             * It plays the music, disables play button and enables the pause button.
+             */
+            function onPlayerPlay()
+            {
+                document.getElementById("audio").play();
+                document.getElementById("playerPlay").disabled = true;
+                document.getElementById("playerPause").disabled = false;
+            }
+
+            /**
+             * This function runs on clicking the pause button in the player.
+             * It pauses the music, disables the pause button and enables the play button.
+             */
+            function onPLayerPause()
+            {
+                document.getElementById("audio").pause();
+                document.getElementById("playerPlay").disabled = false;
+                document.getElementById("playerPause").disabled = true;
+            }
+
+            /**
+             * This function runs when the user chooses or changes the file in the initial form.
+             * It sends the file from the input element to the audio element and uses the jsmediatags library
+             * to read metadata of the audio file.
+             */
+            function onFileChange()
+            {
+                if (document.getElementById("file").value) {
+                    document.getElementById("play").disabled = false;
+
+                    const audioFile = document.getElementById("file").files[0];
+                    document.getElementById("audio").src = URL.createObjectURL(audioFile);
+
+                    let file = document.getElementById("file").files[0];
+
+                    jsmediatags.read(file, {
+                        onSuccess: function(tag) {
+                            if (tag.tags.title)
+                            {
+                                document.getElementById("metadata").style.display = "block";
+                                document.getElementById("noMetadata").style.display = "none"
+                                document.getElementById("songTitle").innerText = tag.tags.title;
+                                document.getElementById("artist").innerText = tag.tags.artist;
+                                document.getElementById("album").innerText = tag.tags.album;
+                            }
+                            else if(!tag.tags.title)
+                            {
+                                document.getElementById("metadata").style.display = "none";
+                                document.getElementById("noMetadata").style.display = "block";
+                                document.getElementById("fileName").innerText = document.getElementById("file").value.slice(12);
+                            }
+
+                            if (tag.tags.picture)
+                            {
+                                let data = tag.tags.picture.data;
+                                let format = tag.tags.picture.format;
+                                let base64String = "";
+
+                                for (let i = 0; i<data.length;i++)
+                                {
+                                    base64String += String.fromCharCode(data[i]);
+                                }
+
+                                document.getElementById("cover").style.backgroundImage = `url(data:${format};base64,${window.btoa(base64String)})`;
+                                document.getElementById("noCover").style.display = "none";
+                            }
+                            else if (!tag.tags.picture)
+                            {
+                                document.getElementById("cover").style.backgroundImage = "none"
+                                document.getElementById("noCover").style.display = "block";
+                            }
+                    },
+                        onError: function(error){
+                            document.getElementById("metadata").style.display = "none";
+                            document.getElementById("noMetadata").style.display = "block";
+                            document.getElementById("fileName").innerText = document.getElementById("file").value.slice(12);
+                            document.getElementById("cover").style.backgroundImage = "none"
+                            document.getElementById("noCover").style.display = "block";
+                            console.log(error);
+                        }
+                    });
+                }
+                else if (!document.getElementById("file").value)
+                {
+                    document.getElementById("play").disabled = true;
+                }
+            }
+
+            /**
+             * This function runs when the audio file finishes playing.
+             * It hides the player and shows a form with options to either play the audio again
+             * or choose another file.
+             */
+            function onEnded() {
+                document.getElementById("overlay").style.display = "block";
+                document.getElementById("fileForm").style.visibility = "hidden";
+                document.getElementById("onEnd").style.visibility = "visible";
+                document.getElementById("player").style.display = "none";
+                document.getElementById("songData").style.display = "none";
+                document.getElementById("cover").style.display = "none";
+            }
+
+            /**
+             * This function runs on clicking the choose another file button in the form
+             * appearing when the song finishes playing.
+             * It hides the onend form and shows the initial interface.
+             */
+            function chooseAnother() {
+                document.getElementById("fileForm").style.visibility = "visible";
+                document.getElementById("onEnd").style.visibility = "hidden";
+            }
+
+            /**
+             * This function runs on every update of the current playing time of the audio file.
+             * It converts the current time from seconds to the hh:mm:ss format and sends it to the player.
+             * It also updates the progress bar in the player.
+             */
+            function  onTimeUpdate() {
+                currentTime = document.getElementById("audio").currentTime;
+                let m = Math.floor(currentTime/60);
+                let s = Math.floor(currentTime % 60);
+                let h = Math.floor(m/60);
+                m = m % 60;
+                h = h.toFixed(0).padStart(2, '0');
+                m = m.toFixed(0).padStart(2, '0');
+                s = s.toFixed(0).padStart(2, '0');
+                currentTime = h + ":" + m + ":" + s;
+                document.getElementById("currentTime").innerText = currentTime;
+                document.getElementById("progressBar").value = document.getElementById("audio").currentTime;
+            }
+
+            /**
+             * This function updates the current time of the audio file on update of the progress bar
+             * in the player
+             */
+            function onBarChange() {
+                document.getElementById("audio").currentTime = document.getElementById("progressBar").value;
+            }
+
+            /**
+             * This section sets out all the elements of the animation made in three js.
+             */
+            const scene = new THREE.Scene();
+
+            const renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            document.body.appendChild(renderer.domElement);
+
+            const camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+
+            /**
+             * Here the initial form of the inside shape in the animation is set out.
+             */
+            let insideShapeGeom = new THREE.IcosahedronGeometry(1.5);
+            const insideGlassMat = new THREE.MeshPhysicalMaterial({color:0xffffff, roughness:0.15, transmission:0.8, thickness:3, metalness:0.1, opacity:0.7, transparent:true});
+            const insideShapeMesh = new THREE.Mesh(insideShapeGeom, insideGlassMat);
+
+            /**
+             * This function changes the geometry of the inside shape depending on the option chosen in the initial form
+             * by the user.
+             */
+            function onShapeChange(input) {
+                switch (input.value) {
+                    case "icosahedron":
+                    default:
+                        insideShapeMesh.geometry.dispose();
+                        insideShapeMesh.geometry = new THREE.IcosahedronGeometry(1.5);
+                        break;
+                    case "dodecahedron":
+                        insideShapeMesh.geometry.dispose();
+                        insideShapeMesh.geometry = new THREE.DodecahedronGeometry(1.5);
+                        break;
+                    case "octahedron":
+                        insideShapeMesh.geometry.dispose();
+                        insideShapeMesh.geometry = new THREE.OctahedronGeometry(1.5);
+                        break;
+                    case "cube":
+                        insideShapeMesh.geometry.dispose();
+                        insideShapeMesh.geometry = new THREE.BoxGeometry(1.5,1.5);
+                        break;
+                    case "tetrahedron":
+                        insideShapeMesh.geometry.dispose();
+                        insideShapeMesh.geometry = new THREE.TetrahedronGeometry(1.5);
+                        break;
+                    case"sphere":
+                        insideShapeMesh.geometry.dispose();
+                        insideShapeMesh.geometry = new THREE.SphereGeometry(1.5);
+                        break;
+                }
+            }
+
+            insideShapeMesh.receiveShadow = true;
+            insideShapeMesh.castShadow = true;
+            scene.add(insideShapeMesh);
+
+            /**
+             * This section sets out the outer shape in the animation that acts as a background of the animation.
+             */
+            const icoOutGeom = new THREE.IcosahedronGeometry(24);
+            const icoOutMat = new THREE.MeshPhysicalMaterial({color:0x000000, reflectivity:1, specularIntensity:1, roughness:0.25, thickness: 100});
+            icoOutMat.side = THREE.BackSide;
+            const icoOutMesh = new THREE.Mesh(icoOutGeom, icoOutMat);
+            icoOutMesh.receiveShadow = true;
+            icoOutMesh.castShadow = true;
+            scene.add(icoOutMesh);
+
+            /**
+             * This section sets out the small spheres in the animation from around the inner shape.
+             */
+            const sphereGeom = new THREE.SphereGeometry(0.1);
+            let spheresRT = [];
+            let spheresRB = [];
+            let spheresLT = [];
+            let spheresLB = [];
+            let positionRX = 1;
+            let positionLX = -1;
+
+            for (let i = 0; i < 16; i++)
+            {
+                let sphereMeshRT = new THREE.Mesh(sphereGeom, insideGlassMat);
+                let sphereMeshRB = new THREE.Mesh(sphereGeom, insideGlassMat);
+                let sphereMeshLT = new THREE.Mesh(sphereGeom, insideGlassMat);
+                let sphereMeshLB = new THREE.Mesh(sphereGeom, insideGlassMat);
+                sphereMeshRT.position.x = positionRX;
+                sphereMeshRT.position.y = 0;
+                sphereMeshRB.position.x = positionRX;
+                sphereMeshRB.position.y = 0;
+                sphereMeshLT.position.x = positionLX;
+                sphereMeshLT.position.y = 0;
+                sphereMeshLB.position.x = positionLX;
+                sphereMeshLB.position.y = 0;
+                spheresLT[i] = sphereMeshLT;
+                spheresRT[i] = sphereMeshRT;
+                spheresRB[i] = sphereMeshRB;
+                spheresLB[i] = sphereMeshLB;
+                positionRX++;
+                positionLX--;
+                scene.add(spheresRT[i]);
+                scene.add(spheresRB[i]);
+                scene.add(spheresLT[i]);
+                scene.add(spheresLB[i]);
+            }
+
+            let spheresEL = [];
+            let spheresER = [];
+            let positionERX = 17;
+            let positionELX = -17;
+
+            for (let i = 0; i < 8; i++)
+            {
+                let sphereMeshEL = new THREE.Mesh(sphereGeom, insideGlassMat);
+                let sphereMeshER = new THREE.Mesh(sphereGeom, insideGlassMat);
+                sphereMeshEL.position.x = positionELX;
+                sphereMeshEL.position.y = 0;
+                sphereMeshER.position.x = positionERX;
+                sphereMeshER.position.y = 0;
+                spheresEL[i] = sphereMeshEL;
+                spheresER[i] = sphereMeshER;
+                positionELX--;
+                positionERX++;
+                scene.add(spheresEL[i]);
+                scene.add(spheresER[i]);
+            }
+
+            /**
+             * This section sets out the light in the middle of the scene.
+             */
+            const pointLight = new THREE.PointLight(0x000000,0,0);
+            pointLight.castShadow = true;
+            scene.add(pointLight);
+
+            camera.position.z = 15;
+
+            let rotationX = 0.001;
+            let rotationY = 0.001;
+            let rotationZ = 0.001;
+            let scaleX = 1;
+            let scaleY = 1;
+            let scaleZ = 1;
+            let lightR = 0;
+            let lightG = 0;
+            let lightB = 0;
+            let lightI = 0;
+            let spherePosition = 0;
+            let lightIdivider = 0;
+
+            /**
+             * This function sets out the animation that is meant to be made in the page, including setting out the changing of the scale
+             * and rotation of the inside shape according to the audio played and position of the surrounding spheres according to the
+             * audio.
+             */
+            function animate() {
+                requestAnimationFrame(animate);
+
+                if (typeof analyser !== 'undefined') {
+
+                    for(let i = 0; i<spheresRT.length; i++)
+                    {
+                        spherePosition = analyser.getFrequencyData()[i]/41.6666666667;
+                        spheresRT[i].position.y = spherePosition;
+                    }
+
+                    for(let i = 0; i<spheresRB.length; i++)
+                    {
+                        spherePosition = (analyser.getFrequencyData()[i]/41.6666666667)*-1;
+                        spheresRB[i].position.y = spherePosition;
+                        spheresRB[i].visible = spherePosition !== 0;
+                    }
+
+                    for(let i = 0; i<spheresLT.length; i++)
+                    {
+                        spherePosition = analyser.getFrequencyData()[i]/41.6666666667;
+                        spheresLT[i].position.y = spherePosition;
+                    }
+
+                    for(let i = 0; i<spheresLB.length; i++)
+                    {
+                        spherePosition = (analyser.getFrequencyData()[i]/41.6666666667)*-1;
+                        spheresLB[i].position.y = spherePosition;
+                        spheresLB[i].visible = spherePosition !== 0;
+                    }
+
+                    if (analyser.getFrequencyData()[0]/100000 > 0.001)
+                    {
+                        rotationX = analyser.getFrequencyData()[0]/100000;
+                    }
+                    else
+                    {
+                        rotationX = 0.001;
+                    }
+
+                    if (analyser.getFrequencyData()[1]/100000 > 0.001)
+                    {
+                        rotationY = analyser.getFrequencyData()[1]/100000;
+                    }
+                    else
+                    {
+                        rotationY = 0.001;
+                    }
+
+                    if (analyser.getFrequencyData()[2]/100000 > 0.001)
+                    {
+                        rotationZ = analyser.getFrequencyData()[2]/100000;
+                    }
+                    else
+                    {
+                        rotationZ = 0.001;
+                    }
+
+                    if (document.getElementById("white").checked)
+                    {
+                        lightR = analyser.getFrequencyData()[0];
+                        lightG = analyser.getFrequencyData()[0];
+                        lightB = analyser.getFrequencyData()[0];
+                        lightIdivider = 1000;
+                    }
+                    else if (document.getElementById("lPink").checked)
+                    {
+                        lightR = 255;
+                        lightG = analyser.getFrequencyData()[0]/2;
+                        lightB = 255;
+                        lightIdivider = 1000;
+                    }
+                    else if (document.getElementById("dPink").checked)
+                    {
+                        lightR = analyser.getFrequencyData()[0];
+                        lightG = 0;
+                        lightB = analyser.getFrequencyData()[0];
+                        lightIdivider = 10000;
+                    }
+                    else if (document.getElementById("lYellow").checked)
+                    {
+                        lightR = 255;
+                        lightG = 255;
+                        lightB = analyser.getFrequencyData()[0]/2;
+                        lightIdivider = 1000;
+                    }
+                    else if (document.getElementById("dYellow").checked)
+                    {
+                        lightR = analyser.getFrequencyData()[0];
+                        lightG = analyser.getFrequencyData()[0];
+                        lightB = 0;
+                        lightIdivider = 10000;
+                    }
+                    else if (document.getElementById("lTeal").checked)
+                    {
+                        lightR = analyser.getFrequencyData()[0]/2;
+                        lightG = 255;
+                        lightB = 255;
+                        lightIdivider = 1000;
+                    }
+                    else if (document.getElementById("dTeal").checked)
+                    {
+                        lightR = 0;
+                        lightG = analyser.getFrequencyData()[0];
+                        lightB = analyser.getFrequencyData()[0];
+                        lightIdivider = 10000;
+                    }
+                    else if (document.getElementById("lRed").checked)
+                    {
+                        lightR = 255;
+                        lightG = analyser.getFrequencyData()[0]/2;
+                        lightB = analyser.getFrequencyData()[0]/2;
+                        lightIdivider = 1000;
+                    }
+                    else if (document.getElementById("dRed").checked)
+                    {
+                        lightR = analyser.getFrequencyData()[0];
+                        lightG = 0;
+                        lightB = 0;
+                        lightIdivider = 10000;
+                    }
+                    else if (document.getElementById("lGreen").checked)
+                    {
+                        lightR = analyser.getFrequencyData()[0]/2;
+                        lightG = 255;
+                        lightB = analyser.getFrequencyData()[0]/2;
+                        lightIdivider = 1000;
+                    }
+                    else if (document.getElementById("dGreen").checked)
+                    {
+                        lightR = 0;
+                        lightG = analyser.getFrequencyData()[0];
+                        lightB = 0;
+                        lightIdivider = 10000;
+                    }
+                    else if (document.getElementById("lBlue").checked)
+                    {
+                        lightR = analyser.getFrequencyData()[0]/2;
+                        lightG = analyser.getFrequencyData()[0]/2;
+                        lightB = 255;
+                        lightIdivider = 1000;
+                    }
+                    else if (document.getElementById("dBlue").checked)
+                    {
+                        lightR = 0;
+                        lightG = 0;
+                        lightB = analyser.getFrequencyData()[0];
+                        lightIdivider = 10000;
+                    }
+
+                    lightI = analyser.getFrequencyData()[0];
+                    pointLight.intensity = lightI/lightIdivider;
+
+                    if (analyser.getFrequencyData()[0]/70 > 1)
+                    {
+                        scaleX = analyser.getFrequencyData()[0]/70;
+                    }
+                    else
+                    {
+                        scaleX = 1;
+                    }
+
+                    if (analyser.getFrequencyData()[1]/70 > 1)
+                    {
+                        scaleY = analyser.getFrequencyData()[1]/70;
+                    }
+                    else
+                    {
+                        scaleY = 1;
+                    }
+
+                    if (analyser.getFrequencyData()[2]/70 > 1)
+                    {
+                        scaleZ = analyser.getFrequencyData()[2]/70;
+                    }
+                    else
+                    {
+                        scaleZ = 1;
+                    }
+                }
+
+                insideShapeMesh.rotation.x += rotationX;
+                insideShapeMesh.rotation.y += rotationY;
+                insideShapeMesh.rotation.z += rotationZ;
+
+                insideShapeMesh.scale.set(scaleX,scaleY,scaleZ);
+
+                icoOutMesh.rotation.x += 0.0005;
+                icoOutMesh.rotation.y += 0.0005;
+
+                pointLight.color = new THREE.Color(lightR,lightG,lightB);
+
+                renderer.render(scene,camera);
+            }
+
+            /**
+             * This function changes the camera aspect and the size of the renderer on change of the size of the browser
+             * window that the page is shown in.
+             */
+            function onWindowResize() {
+                camera.aspect = window.innerWidth/window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+
+            window.addEventListener('resize', onWindowResize, false);
+
+            animate();
+
+        </script>
+    </body>
+</html>
