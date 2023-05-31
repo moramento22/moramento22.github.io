@@ -3,8 +3,8 @@ const MANIFEST = 'flutter-app-manifest';
 const TEMP = 'flutter-temp-cache';
 const CACHE_NAME = 'flutter-app-cache';
 
-const RESOURCES = {"assets/AssetManifest.json": "9be1cc31f68485575c02f943d8a9fff2",
-"assets/AssetManifest.smcbin": "791342b215e122c60cef4d7c20efed8e",
+const RESOURCES = {"assets/AssetManifest.json": "cc055f087100ac0e219bfcb7e88e4256",
+"assets/AssetManifest.smcbin": "a2a4d9687b9ba06931b3c73870fbcfdf",
 "assets/assets/images/audio_screenshot.png": "b8b4e44858841fa696bf52653fb3d909",
 "assets/assets/images/avatar.jpg": "eec1877324224f09a0d1fb1a702a041b",
 "assets/assets/images/ba_screenshot.png": "f98100df7fd529665c86a90e2712614f",
@@ -12,10 +12,13 @@ const RESOURCES = {"assets/AssetManifest.json": "9be1cc31f68485575c02f943d8a9fff
 "assets/assets/images/pattern-tile-home-light.png": "f90698f5d204ad55f1250ce52f1e70d2",
 "assets/assets/images/pattern-tile-home.png": "0a3a52d27990f77ac7b94dac156b58b8",
 "assets/assets/images/treetrip_screenshot.png": "1d32a1cbd82dd4fb108ee68502699557",
-"assets/FontManifest.json": "dc3d03800ccca4601324923c0b1d6d57",
-"assets/fonts/MaterialIcons-Regular.otf": "1c93d4568003c7275e82ecd6e5b28d38",
-"assets/NOTICES": "0131327b73061ce282661b2764931426",
+"assets/FontManifest.json": "5a32d4310a6f5d9a6b651e75ba0d7372",
+"assets/fonts/MaterialIcons-Regular.otf": "771b7722acc995e48be19570d827286b",
+"assets/NOTICES": "75576eee8e8c2a117ea6bae3aa8511c4",
 "assets/packages/cupertino_icons/assets/CupertinoIcons.ttf": "57d849d738900cfd590e9adc7e208250",
+"assets/packages/font_awesome_flutter/lib/fonts/fa-brands-400.ttf": "0db203e8632f03baae0184700f3bda48",
+"assets/packages/font_awesome_flutter/lib/fonts/fa-regular-400.ttf": "01bb14ae3f14c73ee03eed84f480ded9",
+"assets/packages/font_awesome_flutter/lib/fonts/fa-solid-900.ttf": "efc6c90b58d765987f922c95c2031dd2",
 "assets/shaders/ink_sparkle.frag": "f8b80e740d33eb157090be4e995febdf",
 "canvaskit/canvaskit.js": "76f7d822f42397160c5dfc69cbc9b2de",
 "canvaskit/canvaskit.wasm": "f48eaf57cada79163ec6dec7929486ea",
@@ -30,9 +33,9 @@ const RESOURCES = {"assets/AssetManifest.json": "9be1cc31f68485575c02f943d8a9fff
 "icons/Icon-512.png": "96e752610906ba2a93c65f8abe1645f1",
 "icons/Icon-maskable-192.png": "c457ef57daa1d16f64b27b786ec2ea3c",
 "icons/Icon-maskable-512.png": "301a7604d45b3e739efc881eb04896ea",
-"index.html": "d5802ffe9838bc1533d9f3f12fc32d35",
-"/": "d5802ffe9838bc1533d9f3f12fc32d35",
-"main.dart.js": "342cbd6e2ac7d10b3804bd65dc656c44",
+"index.html": "68ae5e1d5b9965c6c275e452205caea0",
+"/": "68ae5e1d5b9965c6c275e452205caea0",
+"main.dart.js": "98e15b29bd778b0a4b0c7d46d1f71925",
 "manifest.json": "4b5b1e9972af67c4b9f19310e0cc71c3",
 "version.json": "96e95de1fccc32b88cc16f029bd5778b"};
 // The application shell files that are downloaded before a service worker can
